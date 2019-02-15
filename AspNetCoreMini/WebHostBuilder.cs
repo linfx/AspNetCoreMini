@@ -11,9 +11,13 @@ namespace WebApplication1
     /// </summary>
     public interface IWebHostBuilder
     {
+        /// <summary>
+        /// Builds an <see cref="IWebHost"/> which hosts a web application.
+        /// </summary>
+        /// <returns></returns>
+        IWebHost Build();
         IWebHostBuilder UseServer(IServer server);
         IWebHostBuilder Configure(Action<IApplicationBuilder> configure);
-        IWebHost Build();
     }
 
     public class WebHostBuilder : IWebHostBuilder

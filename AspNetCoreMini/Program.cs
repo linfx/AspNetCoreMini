@@ -15,10 +15,10 @@
         }
 
         public static RequestDelegate FooMiddleware(RequestDelegate next) => async context =>
-         {
-             await context.Response.WriteAsync("Foo=>");
-             await next(context);
-         };
+        {
+            await context.Response.WriteAsync("Foo=>");
+            await next(context);
+        };
 
         public static RequestDelegate BarMiddleware(RequestDelegate next) => async context =>
         {
