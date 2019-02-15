@@ -10,8 +10,9 @@
 * HttpListenerServer
 * HttpContext和Server之间的适配
 
-----------------------------------
+[原文](https://www.cnblogs.com/artech/p/inside-asp-net-core-framework.html)
 
+----------------------------------
 
 
 
