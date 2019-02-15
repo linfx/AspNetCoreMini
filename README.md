@@ -1,7 +1,6 @@
 ﻿# ASpNetCoreMini
 
-200行代码，7个对象——让你了解ASP.NET Core框架的本质
-[原文](https://www.cnblogs.com/artech/p/inside-asp-net-core-framework.html)
+[原文: 200行代码，7个对象——让你了解ASP.NET Core框架的本质](https://www.cnblogs.com/artech/p/inside-asp-net-core-framework.html)
 
 * 第一个对象：HttpContext
 * 第二个对象：RequetDelegate
