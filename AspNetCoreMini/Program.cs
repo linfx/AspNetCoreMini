@@ -1,4 +1,6 @@
-﻿namespace WebApplication1
+﻿using AspNetCoreMini.Http;
+
+namespace WebApplication1
 {
     public class Program
     {
@@ -8,8 +10,7 @@
                 .UseHttpListener()
                 .Configure(app => app
                     .Use(FooMiddleware)
-                    .Use(BarMiddleware)
-                    .Use(BazMiddleware))
+                    .Use(BarMiddleware))
                 .Build()
                 .StartAsync().Wait();
         }
@@ -25,7 +26,5 @@
             await context.Response.WriteAsync("Bar=>");
             await next(context);
         };
-
-        public static RequestDelegate BazMiddleware(RequestDelegate next) => context => context.Response.WriteAsync("Baz");
     }
 }

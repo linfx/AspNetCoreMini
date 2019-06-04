@@ -1,39 +1,82 @@
-﻿namespace AspNetCoreMini.Http.Features
+﻿using System;
+using System.Runtime.CompilerServices;
+
+namespace AspNetCoreMini.Http.Features
 {
-    /// <summary>
-    /// Feature对象引用，用来保存对应的Feature实例
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public struct FeatureReferences<T>
+    public struct FeatureReferences<TCache>
     {
-        private T _feature;
-        private int _revision;
-
-        private FeatureReferences(T feature, int revision)
+        public FeatureReferences(IFeatureCollection collection)
         {
-            _feature = feature;
-            _revision = revision;
+            Collection = collection;
+            Cache = default;
+            Revision = collection.Revision;
         }
 
-        public static readonly FeatureReferences<T> Default = new FeatureReferences<T>();
-
-        public T Fetch(IFeatureCollection features)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Initalize(IFeatureCollection collection)
         {
-            if (_revision == features.Revision)
+            Revision = collection.Revision;
+            Collection = collection;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Initalize(IFeatureCollection collection, int revision)
+        {
+            Revision = revision;
+            Collection = collection;
+        }
+
+        public IFeatureCollection Collection { get; private set; }
+
+        public int Revision { get; private set; }
+
+        public TCache Cache;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public TFeature Fetch<TFeature, TState>(ref TFeature cached, TState state, Func<TState, TFeature> factory) where TFeature : class
+        {
+            var flush = false;
+            var revision = Collection.Revision;
+            if (Revision != revision)
             {
-                return _feature;
+                // Clear cached value to force call to UpdateCached
+                cached = null;
+                // Collection changed, clear whole feature cache
+                flush = true;
             }
-            _feature = (T)features[typeof(T)];
-            _revision = features.Revision;
-            return _feature;
+
+            return cached ?? UpdateCached(ref cached, state, factory, revision, flush);
         }
 
-        public T Update(IFeatureCollection features, T feature)
+        private TFeature UpdateCached<TFeature, TState>(ref TFeature cached, TState state, Func<TState, TFeature> factory, int revision, bool flush) where TFeature : class
         {
-            features[typeof(T)] = feature;
-            _feature = feature;
-            _revision = features.Revision;
-            return feature;
+            if (flush)
+            {
+                // Collection detected as changed, clear cache
+                Cache = default;
+            }
+
+            cached = Collection.Get<TFeature>();
+            if (cached == null)
+            {
+                // Item not in collection, create it with factory
+                cached = factory(state);
+                // Add item to IFeatureCollection
+                Collection.Set(cached);
+                // Revision changed by .Set, update revision to new value
+                Revision = Collection.Revision;
+            }
+            else if (flush)
+            {
+                // Cache was cleared, but item retrieved from current Collection for version
+                // so use passed in revision rather than making another virtual call
+                Revision = revision;
+            }
+
+            return cached;
         }
+
+        public TFeature Fetch<TFeature>(ref TFeature cached, Func<IFeatureCollection, TFeature> factory)
+            where TFeature : class => Fetch(ref cached, Collection, factory);
     }
 }

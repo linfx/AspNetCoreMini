@@ -1,4 +1,6 @@
-﻿using System;
+﻿using AspNetCoreMini.Http;
+using AspNetCoreMini.Http.Features;
+using System;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
@@ -34,10 +36,11 @@ namespace WebApplication1
             {
                 var listenerContext = await _httpListener.GetContextAsync();
                 var feature = new HttpListenerFeature(listenerContext);
-                var features = new FeatureCollection()
-                    .Set<IHttpRequestFeature>(feature)
-                    .Set<IHttpResponseFeature>(feature);
-                var httpContext = new HttpContext(features);
+                var features = new FeatureCollection();
+                features.Set<IHttpRequestFeature>(feature);
+                features.Set<IHttpResponseFeature>(feature);
+
+                var httpContext = new DefaultHttpContext(features);
                 await handler(httpContext);
                 listenerContext.Response.Close();
             }
@@ -47,13 +50,19 @@ namespace WebApplication1
     public class HttpListenerFeature : IHttpRequestFeature, IHttpResponseFeature
     {
         private readonly HttpListenerContext _context;
+
         public HttpListenerFeature(HttpListenerContext context) => _context = context;
 
         Uri IHttpRequestFeature.Url => _context.Request.Url;
+
         NameValueCollection IHttpRequestFeature.Headers => _context.Request.Headers;
+
         NameValueCollection IHttpResponseFeature.Headers => _context.Response.Headers;
+
         Stream IHttpRequestFeature.Body => _context.Request.InputStream;
+
         Stream IHttpResponseFeature.Body => _context.Response.OutputStream;
+
         int IHttpResponseFeature.StatusCode { get => _context.Response.StatusCode; set => _context.Response.StatusCode = value; }
     }
 }
