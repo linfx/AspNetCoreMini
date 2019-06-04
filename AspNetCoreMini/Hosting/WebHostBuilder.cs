@@ -24,7 +24,7 @@ namespace WebApplication1
 
         public IWebHost Build()
         {
-            var builder = new ApplicationBuilder();
+            var builder = new ApplicationBuilder(null);
             foreach (var configure in _configures)
             {
                 configure(builder);

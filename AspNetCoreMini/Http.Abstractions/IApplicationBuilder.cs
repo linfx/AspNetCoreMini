@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AspNetCoreMini.Http.Features;
+using System;
 
 namespace AspNetCoreMini.Http
 {
@@ -7,6 +8,11 @@ namespace AspNetCoreMini.Http
     /// </summary>
     public interface IApplicationBuilder
     {
+        /// <summary>
+        /// Gets or sets the <see cref="IServiceProvider"/> that provides access to the application's service container.
+        /// </summary>
+        IServiceProvider ApplicationServices { get; set; }
+
         /// <summary>
         /// Adds a middleware delegate to the application's request pipeline.
         /// </summary>

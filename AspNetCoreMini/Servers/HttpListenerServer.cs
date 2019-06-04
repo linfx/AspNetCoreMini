@@ -1,4 +1,5 @@
 ﻿using AspNetCoreMini.Http;
+using AspNetCoreMini.Http.Abstractions.Routing;
 using AspNetCoreMini.Http.Features;
 using System;
 using System.Collections.Specialized;
@@ -40,7 +41,15 @@ namespace WebApplication1
                 features.Set<IHttpRequestFeature>(feature);
                 features.Set<IHttpResponseFeature>(feature);
 
+                var endpoint = new Endpoint(context =>
+                {
+                    //endpointCalled = true;
+                    return Task.CompletedTask;
+                }, EndpointMetadataCollection.Empty, "Test endpoint");
+
                 var httpContext = new DefaultHttpContext(features);
+                httpContext.SetEndpoint(endpoint);
+
                 await handler(httpContext);
                 listenerContext.Response.Close();
             }

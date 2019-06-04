@@ -1,7 +1,5 @@
 ﻿using AspNetCoreMini.Http.Features;
 using System;
-using System.Collections.Specialized;
-using System.IO;
 
 namespace AspNetCoreMini.Http
 {
@@ -30,19 +28,10 @@ namespace AspNetCoreMini.Http
         /// Get the <see cref="HttpResponse"/> object for this request.
         /// </summary>
         public abstract HttpResponse Response { get; }
-    }
 
-    public interface IHttpRequestFeature
-    {
-        Uri Url { get; }
-        NameValueCollection Headers { get; }
-        Stream Body { get; }
-    }
-
-    public interface IHttpResponseFeature
-    {
-        int StatusCode { get; set; }
-        NameValueCollection Headers { get; }
-        Stream Body { get; }
+        /// <summary>
+        /// Gets or sets the <see cref="IServiceProvider"/> that provides access to the request's service container.
+        /// </summary>
+        public abstract IServiceProvider RequestServices { get; set; }
     }
 }
