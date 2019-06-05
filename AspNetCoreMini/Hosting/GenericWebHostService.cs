@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace AspNetCoreMini.Hosting
 {
-    public class WebHostService : IHostedService
+    public class GenericWebHostService : IHostedService
     {
-        public WebHostService(IServer server)
+        public GenericWebHostService(IServer server)
         {
             Server = server;
         }

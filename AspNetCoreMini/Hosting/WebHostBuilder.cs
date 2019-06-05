@@ -51,5 +51,10 @@ namespace AspNetCoreMini.Hosting
 
             return null;
         }
+
+        public IWebHostBuilder ConfigureServices(Action<WebHostBuilderContext, IServiceCollection> configureServices)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

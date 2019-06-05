@@ -3,23 +3,21 @@ using AspNetCoreMini.Http;
 using AspNetCoreMini.Http.Abstractions.Routing;
 using AspNetCoreMini.Http.Features;
 using System;
-using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace AspNetCoreMini.Servers
 {
-
     public class HttpListenerServer : IServer
     {
         private readonly HttpListener _httpListener;
         private readonly string[] _urls;
 
-        public HttpListenerServer(params string[] urls)
+        public HttpListenerServer()
         {
             _httpListener = new HttpListener();
-            _urls = urls.Any() ? urls : new string[] { "http://localhost:5000/" };
+            _urls = new string[] { "http://localhost:5000/" };
         }
 
         public IFeatureCollection Features { get; }

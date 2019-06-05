@@ -1,13 +1,34 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 
 namespace AspNetCoreMini.Hosting.Extensions
 {
     internal class HostBuilder : IHostBuilder
     {
         //private IServiceFactoryAdapter _serviceProviderFactory = new ServiceFactoryAdapter<IServiceCollection>(new DefaultServiceProviderFactory());
+        private List<Action<HostBuilderContext, IServiceCollection>> _configureServicesActions = new List<Action<HostBuilderContext, IServiceCollection>>();
         private bool _hostBuilt;
+        private IConfiguration _hostConfiguration;
+        private HostBuilderContext _hostBuilderContext;
         private IServiceProvider _appServices;
+
+        /// <summary>
+        /// A central location for sharing state between components during the host building process.
+        /// </summary>
+        public IDictionary<object, object> Properties { get; } = new Dictionary<object, object>();
+
+        /// <summary>
+        /// Adds services to the container. This can be called multiple times and the results will be additive.
+        /// </summary>
+        /// <param name="configureDelegate"></param>
+        /// <returns>The same instance of the <see cref="IHostBuilder"/> for chaining.</returns>
+        public IHostBuilder ConfigureServices(Action<HostBuilderContext, IServiceCollection> configureDelegate)
+        {
+            _configureServicesActions.Add(configureDelegate ?? throw new ArgumentNullException(nameof(configureDelegate)));
+            return this;
+        }
 
         public IHost Build()
         {
@@ -19,16 +40,33 @@ namespace AspNetCoreMini.Hosting.Extensions
 
             //BuildHostConfiguration();
             //CreateHostingEnvironment();
-            //CreateHostBuilderContext();
+            CreateHostBuilderContext();
             //BuildAppConfiguration();
             CreateServiceProvider();
 
             return _appServices.GetRequiredService<IHost>();
         }
 
-        internal void UseDefaultServiceProvider(Func<object, object, object> p)
+        private void BuildHostConfiguration()
         {
-            throw new NotImplementedException();
+            var configBuilder = new ConfigurationBuilder()
+                .AddInMemoryCollection(); // Make sure there's some default storage since there are no default providers
+
+            //foreach (var buildAction in _configureHostConfigActions)
+            //{
+            //    buildAction(configBuilder);
+            //}
+            _hostConfiguration = configBuilder.Build();
+        }
+
+
+        private void CreateHostBuilderContext()
+        {
+            _hostBuilderContext = new HostBuilderContext(Properties)
+            {
+                //HostingEnvironment = _hostingEnvironment,
+                Configuration = _hostConfiguration
+            };
         }
 
         private void CreateServiceProvider()
@@ -38,10 +76,10 @@ namespace AspNetCoreMini.Hosting.Extensions
             services.AddOptions();
             services.AddLogging();
 
-            //foreach (var configureServicesAction in _configureServicesActions)
-            //{
-            //    configureServicesAction(_hostBuilderContext, services);
-            //}
+            foreach (var configureServicesAction in _configureServicesActions)
+            {
+                configureServicesAction(_hostBuilderContext, services);
+            }
 
             //var containerBuilder = _serviceProviderFactory.CreateBuilder(services);
 
