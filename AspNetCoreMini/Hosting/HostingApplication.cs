@@ -10,32 +10,27 @@ namespace AspNetCoreMini.Hosting
     public class HostingApplication : IHttpApplication<HostingApplication.Context>
     {
         private readonly RequestDelegate _application;
-        //private readonly IHttpContextFactory _httpContextFactory;
+        private readonly IHttpContextFactory _httpContextFactory;
         //private HostingApplicationDiagnostics _diagnostics;
 
-        //public HostingApplication(
-        //    RequestDelegate application,
-        //    IHttpContextFactory httpContextFactory)
-        //{
-        //    _application = application;
-        //    //_diagnostics = new HostingApplicationDiagnostics(logger, diagnosticSource);
-        //    //_httpContextFactory = httpContextFactory;
-        //}
-
-        public HostingApplication(RequestDelegate application)
+        public HostingApplication(
+            RequestDelegate application,
+            IHttpContextFactory httpContextFactory)
         {
             _application = application;
+            //_diagnostics = new HostingApplicationDiagnostics(logger, diagnosticSource);
+            _httpContextFactory = httpContextFactory;
         }
 
         // Set up the request
         public Context CreateContext(IFeatureCollection contextFeatures)
         {
             var context = new Context();
-            //var httpContext = _httpContextFactory.Create(contextFeatures);
+            var httpContext = _httpContextFactory.Create(contextFeatures);
 
             //_diagnostics.BeginRequest(httpContext, ref context);
 
-            //context.HttpContext = httpContext;
+            context.HttpContext = httpContext;
             return context;
         }
 
@@ -50,7 +45,7 @@ namespace AspNetCoreMini.Hosting
         {
             var httpContext = context.HttpContext;
             //_diagnostics.RequestEnd(httpContext, exception, context);
-            //_httpContextFactory.Dispose(httpContext);
+            _httpContextFactory.Dispose(httpContext);
             //_diagnostics.ContextDisposed(context);
         }
 

@@ -35,21 +35,8 @@ namespace AspNetCoreMini.Servers
                 features.Set<IHttpRequestFeature>(feature);
                 features.Set<IHttpResponseFeature>(feature);
 
-                //var endpoint = new Endpoint(context =>
-                //{
-                //    //endpointCalled = true;
-                //    return Task.CompletedTask;
-                //}, EndpointMetadataCollection.Empty, "Test endpoint");
-
-                //var httpContext = new DefaultHttpContext(features);
-                //httpContext.SetEndpoint(endpoint);
-
-
-                //HostingApplication context = new HostingApplication.Context();
-                //context.HttpContext = new DefaultHttpContext(features);
-
-                ////await handler(httpContext);
-                //await application.ProcessRequestAsync((TContext)context);
+                var httpContext = application.CreateContext(features);
+                await application.ProcessRequestAsync(httpContext);
 
                 listenerContext.Response.Close();
             }

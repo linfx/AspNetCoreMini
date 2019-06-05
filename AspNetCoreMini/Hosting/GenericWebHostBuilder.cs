@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 using AspNetCoreMini.Hosting.Extensions;
+using AspNetCoreMini.Http;
+using AspNetCoreMini.Http.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -24,6 +27,10 @@ namespace AspNetCoreMini.Hosting
             {
                 //services.AddHostedService<GenericWebHostService>();
                 services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, GenericWebHostService>());
+
+                services.TryAddSingleton<IHttpContextFactory, DefaultHttpContextFactory>();
+                //services.TryAddScoped<IMiddlewareFactory, MiddlewareFactory>();
+                //services.TryAddSingleton<IApplicationBuilderFactory, ApplicationBuilderFactory>();
             });
         }
 
