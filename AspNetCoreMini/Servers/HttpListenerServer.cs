@@ -1,22 +1,15 @@
-﻿using AspNetCoreMini.Http;
+﻿using AspNetCoreMini.Hosting.Server.Abstractions;
+using AspNetCoreMini.Http;
 using AspNetCoreMini.Http.Abstractions.Routing;
 using AspNetCoreMini.Http.Features;
 using System;
-using System.Collections.Specialized;
-using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace WebApplication1
+namespace AspNetCoreMini.Servers
 {
-    /// <summary>
-    ///  第五个对象：Server
-    /// </summary>
-    public interface IServer
-    {
-        Task StartAsync(RequestDelegate handler);
-    }
 
     public class HttpListenerServer : IServer
     {
@@ -29,7 +22,9 @@ namespace WebApplication1
             _urls = urls.Any() ? urls : new string[] { "http://localhost:5000/" };
         }
 
-        public async Task StartAsync(RequestDelegate handler)
+        public IFeatureCollection Features { get; }
+
+        public async Task StartAsync<TContext>(IHttpApplication<TContext> application, CancellationToken cancellationToken)
         {
             Array.ForEach(_urls, url => _httpListener.Prefixes.Add(url));
             _httpListener.Start();
@@ -50,28 +45,15 @@ namespace WebApplication1
                 var httpContext = new DefaultHttpContext(features);
                 httpContext.SetEndpoint(endpoint);
 
-                await handler(httpContext);
+                //await handler(httpContext);
                 listenerContext.Response.Close();
             }
         }
-    }
 
-    public class HttpListenerFeature : IHttpRequestFeature, IHttpResponseFeature
-    {
-        private readonly HttpListenerContext _context;
-
-        public HttpListenerFeature(HttpListenerContext context) => _context = context;
-
-        Uri IHttpRequestFeature.Url => _context.Request.Url;
-
-        NameValueCollection IHttpRequestFeature.Headers => _context.Request.Headers;
-
-        NameValueCollection IHttpResponseFeature.Headers => _context.Response.Headers;
-
-        Stream IHttpRequestFeature.Body => _context.Request.InputStream;
-
-        Stream IHttpResponseFeature.Body => _context.Response.OutputStream;
-
-        int IHttpResponseFeature.StatusCode { get => _context.Response.StatusCode; set => _context.Response.StatusCode = value; }
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            _httpListener.Stop();
+            return Task.CompletedTask;
+        }
     }
 }
