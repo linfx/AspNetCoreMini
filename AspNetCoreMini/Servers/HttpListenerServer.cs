@@ -1,4 +1,5 @@
-﻿using AspNetCoreMini.Hosting.Server.Abstractions;
+﻿using AspNetCoreMini.Hosting;
+using AspNetCoreMini.Hosting.Server.Abstractions;
 using AspNetCoreMini.Http;
 using AspNetCoreMini.Http.Abstractions.Routing;
 using AspNetCoreMini.Http.Features;
@@ -34,16 +35,22 @@ namespace AspNetCoreMini.Servers
                 features.Set<IHttpRequestFeature>(feature);
                 features.Set<IHttpResponseFeature>(feature);
 
-                var endpoint = new Endpoint(context =>
-                {
-                    //endpointCalled = true;
-                    return Task.CompletedTask;
-                }, EndpointMetadataCollection.Empty, "Test endpoint");
+                //var endpoint = new Endpoint(context =>
+                //{
+                //    //endpointCalled = true;
+                //    return Task.CompletedTask;
+                //}, EndpointMetadataCollection.Empty, "Test endpoint");
 
-                var httpContext = new DefaultHttpContext(features);
-                httpContext.SetEndpoint(endpoint);
+                //var httpContext = new DefaultHttpContext(features);
+                //httpContext.SetEndpoint(endpoint);
 
-                //await handler(httpContext);
+
+                //HostingApplication context = new HostingApplication.Context();
+                //context.HttpContext = new DefaultHttpContext(features);
+
+                ////await handler(httpContext);
+                //await application.ProcessRequestAsync((TContext)context);
+
                 listenerContext.Response.Close();
             }
         }

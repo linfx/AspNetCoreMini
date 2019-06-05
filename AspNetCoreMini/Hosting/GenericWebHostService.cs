@@ -1,5 +1,6 @@
 ﻿using AspNetCoreMini.Hosting.Extensions;
 using AspNetCoreMini.Hosting.Server.Abstractions;
+using AspNetCoreMini.Http;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,7 +18,12 @@ namespace AspNetCoreMini.Hosting
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            //await Server.StartAsync();
+            RequestDelegate application = null;
+
+
+            var httpApplication = new HostingApplication(application);
+
+            await Server.StartAsync(httpApplication, cancellationToken);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

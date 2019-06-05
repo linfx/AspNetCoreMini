@@ -1,5 +1,6 @@
 ﻿using AspNetCoreMini.Hosting;
 using AspNetCoreMini.Hosting.Extensions;
+using AspNetCoreMini.Http;
 using AspNetCoreMini.Servers;
 using System.Threading.Tasks;
 
@@ -9,17 +10,14 @@ namespace WebApplication1
     {
         public static async Task Main(string[] args)
         {
-            //new WebHostBuilder()
-            //    .UseHttpListener()
-            //    .Configure(app => app
-            //        .Use(FooMiddleware)
-            //        .Use(BarMiddleware))
-            //    .Build()
-
             var host = Host.CreateDefaultBuilder(args)
                 .ConfigureWebHost(builder =>
                 {
-                    builder.UseHttpListenerServer();
+                    builder
+                    .UseHttpListenerServer()
+                    .Configure(app => app
+                        .Use(FooMiddleware)
+                        .Use(BarMiddleware));
                 })
                 .Build();
 
@@ -38,16 +36,16 @@ namespace WebApplication1
         //            //webBuilder.UseStartup<Startup>();
         //        });
 
-        //public static RequestDelegate FooMiddleware(RequestDelegate next) => async context =>
-        //{
-        //    await context.Response.WriteAsync("Foo=>");
-        //    await next(context);
-        //};
+        public static RequestDelegate FooMiddleware(RequestDelegate next) => async context =>
+        {
+            //await context.Response.WriteAsync("Foo=>");
+            await next(context);
+        };
 
-        //public static RequestDelegate BarMiddleware(RequestDelegate next) => async context =>
-        //{
-        //    await context.Response.WriteAsync("Bar=>");
-        //    await next(context);
-        //};
+        public static RequestDelegate BarMiddleware(RequestDelegate next) => async context =>
+        {
+            //await context.Response.WriteAsync("Bar=>");
+            await next(context);
+        };
     }
 }

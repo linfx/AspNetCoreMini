@@ -38,7 +38,7 @@ namespace AspNetCoreMini.Hosting.Extensions
             }
             _hostBuilt = true;
 
-            //BuildHostConfiguration();
+            BuildHostConfiguration();
             //CreateHostingEnvironment();
             CreateHostBuilderContext();
             //BuildAppConfiguration();
