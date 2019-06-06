@@ -1,11 +1,7 @@
-﻿using AspNetCoreMini.Extensions.Hosting;
-using AspNetCoreMini.Http;
+﻿using AspNetCoreMini.Http;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace AspNetCoreMini.Hosting
 {
@@ -52,7 +48,7 @@ namespace AspNetCoreMini.Hosting
             {
                 services.AddSingleton<IStartup>(sp =>
                 {
-                    return new DelegateStartup(sp.GetRequiredService<IServiceProviderFactory<IServiceCollection>>(), (app => configureApp(context, app)));
+                    return new DelegateStartup(sp.GetRequiredService<IServiceProviderFactory<IServiceCollection>>(), app => configureApp(context, app));
                 });
             });
         }

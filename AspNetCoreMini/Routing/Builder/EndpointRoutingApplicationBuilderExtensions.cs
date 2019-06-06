@@ -1,12 +1,10 @@
 ﻿using AspNetCoreMini.Http;
-using AspNetCoreMini.Http.Abstractions.Extensions;
 using System;
 
 namespace AspNetCoreMini.Routing.Builder
 {
     public static class EndpointRoutingApplicationBuilderExtensions
     {
-
         public static IApplicationBuilder UseEndpoints(this IApplicationBuilder builder, Action<IEndpointRouteBuilder> configure)
         {
             if (builder == null)

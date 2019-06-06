@@ -2,17 +2,13 @@
 
 namespace AspNetCoreMini.Hosting
 {
-    internal class WebHostOptions
+    public class WebHostOptions
     {
-        private IConfiguration configuration;
-        private string name;
-
-        public WebHostOptions(IConfiguration configuration, string name)
+        public WebHostOptions(IConfiguration configuration, string applicationNameFallback)
         {
-            this.configuration = configuration;
-            this.name = name;
+            ApplicationName = applicationNameFallback;
         }
 
-        public bool CaptureStartupErrors { get; internal set; }
+        public string ApplicationName { get; set; }
     }
 }

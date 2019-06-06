@@ -3,7 +3,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AspNetCoreMini.Http.Abstractions.Extensions
+namespace AspNetCoreMini.Http
 {
     public static class HttpResponseWritingExtensions
     {

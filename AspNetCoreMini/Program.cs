@@ -1,9 +1,10 @@
 ﻿using AspNetCoreMini.Extensions.Hosting;
 using AspNetCoreMini.Hosting;
+using AspNetCoreMini.Http;
 using AspNetCoreMini.Servers;
 using System.Threading.Tasks;
 
-namespace WebApplication1
+namespace AspNetCoreMini
 {
     public class Program
     {
@@ -15,10 +16,10 @@ namespace WebApplication1
                     builder.UseHttpListenerServer()
                     .Configure(app =>
                     {
-                        //app.Run(async (context) =>
-                        //{
-                        //    await context.Response.WriteAsync("Hello World!");
-                        //});
+                        app.Run(async (context) =>
+                        {
+                            await context.Response.WriteAsync("Hello World!");
+                        });
                     });
                 })
                 .Build();

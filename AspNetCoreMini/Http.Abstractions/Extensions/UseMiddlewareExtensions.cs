@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace AspNetCoreMini.Http.Abstractions.Extensions
+namespace AspNetCoreMini.Http
 {
     public static class UseMiddlewareExtensions
     {

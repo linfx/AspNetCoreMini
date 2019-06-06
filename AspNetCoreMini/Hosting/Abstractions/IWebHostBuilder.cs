@@ -10,12 +10,6 @@ namespace AspNetCoreMini.Hosting
     public interface IWebHostBuilder
     {
         /// <summary>
-        /// Builds an <see cref="IWebHost"/> which hosts a web application.
-        /// </summary>
-        /// <returns></returns>
-        IWebHost Build();
-
-        /// <summary>
         /// Adds a delegate for configuring additional services for the host or web application. This may be called
         /// multiple times.
         /// </summary>
