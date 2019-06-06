@@ -1,24 +1,29 @@
-﻿using AspNetCoreMini.Hosting.Extensions;
+﻿using AspNetCoreMini.Hosting.Builder;
+using AspNetCoreMini.Extensions.Hosting;
 using AspNetCoreMini.Hosting.Server.Abstractions;
 using AspNetCoreMini.Http;
-using AspNetCoreMini.Http.Abstractions;
+using Microsoft.Extensions.Options;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace AspNetCoreMini.Hosting
 {
-    public class GenericWebHostService : IHostedService
+    internal class GenericWebHostService : IHostedService
     {
-        public GenericWebHostService(IServer server, IHttpContextFactory httpContextFactory)
+        public GenericWebHostService(IOptions<GenericWebHostServiceOptions> options, IServer server, IHttpContextFactory httpContextFactory, IApplicationBuilderFactory applicationBuilderFactory)
         {
+            Options = options.Value;
             Server = server;
             HttpContextFactory = httpContextFactory;
+            ApplicationBuilderFactory = applicationBuilderFactory;
         }
 
+        public GenericWebHostServiceOptions Options { get; }
         public IServer Server { get; }
-
         public IHttpContextFactory HttpContextFactory { get; }
+        public IApplicationBuilderFactory ApplicationBuilderFactory { get; }
+        //public IConfiguration Configuration { get; }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
@@ -26,8 +31,18 @@ namespace AspNetCoreMini.Hosting
 
             try
             {
-                var builder = new ApplicationBuilder(null);
+                Action<IApplicationBuilder> configure = Options.ConfigureApplication;
 
+                if (configure == null)
+                {
+                    throw new InvalidOperationException($"No application configured. Please specify an application via IWebHostBuilder.UseStartup, IWebHostBuilder.Configure, or specifying the startup assembly via {nameof(Microsoft.AspNetCore.Hosting.WebHostDefaults.StartupAssemblyKey)} in the web host configuration.");
+                }
+
+                var builder = ApplicationBuilderFactory.CreateBuilder(Server.Features);
+
+                configure(builder);
+
+                // Build the request pipeline
                 application = builder.Build();
             }
             catch (Exception)

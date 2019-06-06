@@ -19,6 +19,12 @@ namespace AspNetCoreMini.Http
             ApplicationServices = serviceProvider;
         }
 
+        public ApplicationBuilder(IServiceProvider serviceProvider, object server)
+            : this(serviceProvider)
+        {
+            //SetProperty(Constants.BuilderProperties.ServerFeatures, server);
+        }
+
         public IServiceProvider ApplicationServices { get; set; }
 
         public IApplicationBuilder Use(Func<RequestDelegate, RequestDelegate> middleware)

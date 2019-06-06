@@ -1,9 +1,9 @@
-﻿using AspNetCoreMini.Hosting.Extensions;
+﻿using AspNetCoreMini.Extensions.Hosting;
 using System;
 
 namespace AspNetCoreMini.Hosting
 {
-    public static class GenericHostWebHostBuilderExtensions
+    internal static class GenericHostWebHostBuilderExtensions
     {
         public static IHostBuilder ConfigureWebHost(this IHostBuilder builder, Action<IWebHostBuilder> configure)
         {

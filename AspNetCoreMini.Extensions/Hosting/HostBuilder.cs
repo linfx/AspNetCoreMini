@@ -1,14 +1,16 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using AspNetCoreMini.Extensions.Hosting.Internal;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 
-namespace AspNetCoreMini.Hosting.Extensions
+namespace AspNetCoreMini.Extensions.Hosting
 {
     internal class HostBuilder : IHostBuilder
     {
-        //private IServiceFactoryAdapter _serviceProviderFactory = new ServiceFactoryAdapter<IServiceCollection>(new DefaultServiceProviderFactory());
+        private List<Action<IConfigurationBuilder>> _configureHostConfigActions = new List<Action<IConfigurationBuilder>>();
         private List<Action<HostBuilderContext, IServiceCollection>> _configureServicesActions = new List<Action<HostBuilderContext, IServiceCollection>>();
+        private IServiceFactoryAdapter _serviceProviderFactory = new ServiceFactoryAdapter<IServiceCollection>(new DefaultServiceProviderFactory());
         private bool _hostBuilt;
         private IConfiguration _hostConfiguration;
         private HostBuilderContext _hostBuilderContext;
@@ -18,6 +20,18 @@ namespace AspNetCoreMini.Hosting.Extensions
         /// A central location for sharing state between components during the host building process.
         /// </summary>
         public IDictionary<object, object> Properties { get; } = new Dictionary<object, object>();
+
+        /// <summary>
+        /// Set up the configuration for the builder itself. This will be used to initialize the <see cref="IHostEnvironment"/>
+        /// for use later in the build process. This can be called multiple times and the results will be additive.
+        /// </summary>
+        /// <param name="configureDelegate"></param>
+        /// <returns>The same instance of the <see cref="IHostBuilder"/> for chaining.</returns>
+        public IHostBuilder ConfigureHostConfiguration(Action<IConfigurationBuilder> configureDelegate)
+        {
+            _configureHostConfigActions.Add(configureDelegate ?? throw new ArgumentNullException(nameof(configureDelegate)));
+            return this;
+        }
 
         /// <summary>
         /// Adds services to the container. This can be called multiple times and the results will be additive.
@@ -52,10 +66,10 @@ namespace AspNetCoreMini.Hosting.Extensions
             var configBuilder = new ConfigurationBuilder()
                 .AddInMemoryCollection(); // Make sure there's some default storage since there are no default providers
 
-            //foreach (var buildAction in _configureHostConfigActions)
-            //{
-            //    buildAction(configBuilder);
-            //}
+            foreach (var buildAction in _configureHostConfigActions)
+            {
+                buildAction(configBuilder);
+            }
             _hostConfiguration = configBuilder.Build();
         }
 
@@ -72,6 +86,8 @@ namespace AspNetCoreMini.Hosting.Extensions
         private void CreateServiceProvider()
         {
             var services = new ServiceCollection();
+            services.AddSingleton(_hostBuilderContext);
+            services.AddSingleton<IHostApplicationLifetime, ApplicationLifetime>();
             services.AddSingleton<IHost, Internal.Host>();
             services.AddOptions();
             services.AddLogging();
@@ -81,15 +97,14 @@ namespace AspNetCoreMini.Hosting.Extensions
                 configureServicesAction(_hostBuilderContext, services);
             }
 
-            //var containerBuilder = _serviceProviderFactory.CreateBuilder(services);
+            var containerBuilder = _serviceProviderFactory.CreateBuilder(services);
 
             //foreach (var containerAction in _configureContainerActions)
             //{
             //    containerAction.ConfigureContainer(_hostBuilderContext, containerBuilder);
             //}
 
-            //_appServices = _serviceProviderFactory.CreateServiceProvider(containerBuilder);
-            _appServices = services.BuildServiceProvider();
+            _appServices = _serviceProviderFactory.CreateServiceProvider(containerBuilder);
 
             if (_appServices == null)
             {
@@ -98,7 +113,7 @@ namespace AspNetCoreMini.Hosting.Extensions
 
             // resolve configuration explicitly once to mark it as resolved within the
             // service provider, ensuring it will be properly disposed with the provider
-            //_ = _appServices.GetService<IConfiguration>();
+            _ = _appServices.GetService<IConfiguration>();
         }
     }
 }

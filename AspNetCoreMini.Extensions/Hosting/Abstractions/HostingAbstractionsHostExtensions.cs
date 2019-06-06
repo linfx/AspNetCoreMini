@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AspNetCoreMini.Hosting.Extensions
+namespace AspNetCoreMini.Extensions.Hosting
 {
     public static class HostingAbstractionsHostExtensions
     {
@@ -42,7 +42,7 @@ namespace AspNetCoreMini.Hosting.Extensions
         /// <param name="token">The token to trigger shutdown.</param>
         public static async Task WaitForShutdownAsync(this IHost host, CancellationToken token = default)
         {
-            //var applicationLifetime = host.Services.GetService<IHostApplicationLifetime>();
+            var applicationLifetime = host.Services.GetService<IHostApplicationLifetime>();
 
             //token.Register(state =>
             //{

@@ -1,12 +1,11 @@
-﻿using System;
-using System.Diagnostics;
-using System.Reflection;
-using AspNetCoreMini.Hosting.Extensions;
+﻿using AspNetCoreMini.Hosting.Builder;
+using AspNetCoreMini.Extensions.Hosting;
 using AspNetCoreMini.Http;
-using AspNetCoreMini.Http.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using System;
+using System.Reflection;
 
 namespace AspNetCoreMini.Hosting
 {
@@ -25,12 +24,20 @@ namespace AspNetCoreMini.Hosting
 
             _builder.ConfigureServices((context, services) =>
             {
+                services.Configure<GenericWebHostServiceOptions>(options =>
+                {
+                    // Set the options
+                    //options.WebHostOptions = webHostOptions;
+                    // Store and forward any startup errors
+                    //options.HostingStartupExceptions = _hostingStartupErrors;
+                });
+
                 //services.AddHostedService<GenericWebHostService>();
                 services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, GenericWebHostService>());
 
                 services.TryAddSingleton<IHttpContextFactory, DefaultHttpContextFactory>();
                 //services.TryAddScoped<IMiddlewareFactory, MiddlewareFactory>();
-                //services.TryAddSingleton<IApplicationBuilderFactory, ApplicationBuilderFactory>();
+                services.TryAddSingleton<IApplicationBuilderFactory, ApplicationBuilderFactory>();
             });
         }
 
@@ -50,6 +57,20 @@ namespace AspNetCoreMini.Hosting
             {
                 var webhostBuilderContext = GetWebHostBuilderContext(context);
                 configureServices(webhostBuilderContext, builder);
+            });
+
+            return this;
+        }
+
+        public IWebHostBuilder Configure(Action<WebHostBuilderContext, IApplicationBuilder> configure)
+        {
+            _builder.ConfigureServices((context, services) =>
+            {
+                services.Configure<GenericWebHostServiceOptions>(options =>
+                {
+                    var webhostBuilderContext = GetWebHostBuilderContext(context);
+                    options.ConfigureApplication = app => configure(webhostBuilderContext, app);
+                });
             });
 
             return this;

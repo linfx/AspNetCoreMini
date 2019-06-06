@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AspNetCoreMini.Hosting.Extensions
+namespace AspNetCoreMini.Extensions.Hosting
 {
     /// <summary>
     /// A program abstraction.

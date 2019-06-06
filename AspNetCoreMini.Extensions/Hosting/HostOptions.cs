@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AspNetCoreMini.Hosting.Extensions
+namespace AspNetCoreMini.Extensions.Hosting
 {
     /// <summary>
     /// Options for <see cref="IHost"/>

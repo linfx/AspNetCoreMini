@@ -6,7 +6,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AspNetCoreMini.Hosting
+namespace AspNetCoreMini.Hosting.Internal
 {
 
     public class WebHost : IWebHost

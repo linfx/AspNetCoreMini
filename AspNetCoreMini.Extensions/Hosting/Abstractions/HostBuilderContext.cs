@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 
-namespace AspNetCoreMini.Hosting.Extensions
+namespace AspNetCoreMini.Extensions.Hosting
 {
     /// <summary>
     /// Context containing the common services on the <see cref="IHost" />. Some properties may be null until set by the <see cref="IHost" />.

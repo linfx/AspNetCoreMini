@@ -7,35 +7,50 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AspNetCoreMini.Hosting.Extensions.Internal
+namespace AspNetCoreMini.Extensions.Hosting.Internal
 {
-    public class Host : IHost
+    internal class Host : IHost
     {
         private readonly ILogger<Host> _logger;
+        //private readonly IHostLifetime _hostLifetime;
+        private readonly ApplicationLifetime _applicationLifetime;
         private readonly HostOptions _options;
         private IEnumerable<IHostedService> _hostedServices;
 
         public Host(
+            IServiceProvider services,
+            IHostApplicationLifetime applicationLifetime,
             ILogger<Host> logger,
-            IOptions<HostOptions> options, 
-            IServiceProvider services)
+            //IHostLifetime hostLifetime,
+            IOptions<HostOptions> options)
         {
-            _logger = logger;
-            _options = options.Value;
-            Services = services;
+            Services = services ?? throw new ArgumentNullException(nameof(services));
+            _applicationLifetime = (applicationLifetime ?? throw new ArgumentNullException(nameof(applicationLifetime))) as ApplicationLifetime;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            //_hostLifetime = hostLifetime ?? throw new ArgumentNullException(nameof(hostLifetime));
+            _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
         public IServiceProvider Services { get; }
 
         public async Task StartAsync(CancellationToken cancellationToken = default)
         {
+            using var combinedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _applicationLifetime.ApplicationStopping);
+            var combinedCancellationToken = combinedCancellationTokenSource.Token;
+
+            //await _hostLifetime.WaitForStartAsync(combinedCancellationToken);
+
+            combinedCancellationToken.ThrowIfCancellationRequested();
             _hostedServices = Services.GetService<IEnumerable<IHostedService>>();
 
             foreach (var hostedService in _hostedServices)
             {
                 // Fire IHostedService.Start
-                await hostedService.StartAsync(cancellationToken).ConfigureAwait(false);
+                await hostedService.StartAsync(combinedCancellationToken).ConfigureAwait(false);
             }
+
+            // Fire IHostApplicationLifetime.Started
+            _applicationLifetime?.NotifyStarted();
         }
 
         public async Task StopAsync(CancellationToken cancellationToken = default)
@@ -45,7 +60,7 @@ namespace AspNetCoreMini.Hosting.Extensions.Internal
             {
                 var token = linkedCts.Token;
                 // Trigger IHostApplicationLifetime.ApplicationStopping
-                //_applicationLifetime?.StopApplication();
+                _applicationLifetime?.StopApplication();
 
                 IList<Exception> exceptions = new List<Exception>();
                 if (_hostedServices != null) // Started?
@@ -68,7 +83,7 @@ namespace AspNetCoreMini.Hosting.Extensions.Internal
                 //await _hostLifetime.StopAsync(token);
 
                 // Fire IHostApplicationLifetime.Stopped
-                //_applicationLifetime?.NotifyStopped();
+                _applicationLifetime?.NotifyStopped();
 
                 if (exceptions.Count > 0)
                 {
