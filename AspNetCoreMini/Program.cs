@@ -2,6 +2,7 @@
 using AspNetCoreMini.Hosting;
 using AspNetCoreMini.Http;
 using AspNetCoreMini.Servers;
+using System;
 using System.Threading.Tasks;
 
 namespace AspNetCoreMini
@@ -11,17 +12,17 @@ namespace AspNetCoreMini
         public static async Task Main(string[] args)
         {
             var host = Host.CreateDefaultBuilder()
-                .ConfigureWebHost(builder =>
-                {
-                    builder.UseHttpListenerServer()
-                    .Configure(app =>
-                    {
-                        app.Run(async (context) =>
-                        {
-                            await context.Response.WriteAsync("Hello World!");
-                        });
-                    });
-                })
+                //.ConfigureWebHost(builder =>
+                //{
+                //    builder.UseHttpListenerServer()
+                //    .Configure(app =>
+                //    {
+                //        app.Run(async (context) =>
+                //        {
+                //            await context.Response.WriteAsync("Hello World!");
+                //        });
+                //    });
+                //})
                 .Build();
 
             await host.RunAsync();

@@ -13,10 +13,10 @@ namespace AspNetCoreMini.Extensions.Hosting
             Properties = properties ?? throw new System.ArgumentNullException(nameof(properties));
         }
 
-        ///// <summary>
-        ///// The <see cref="IHostEnvironment" /> initialized by the <see cref="IHost" />.
-        ///// </summary>
-        //public IHostEnvironment HostingEnvironment { get; set; }
+        /// <summary>
+        /// The <see cref="IHostEnvironment" /> initialized by the <see cref="IHost" />.
+        /// </summary>
+        public IHostEnvironment HostingEnvironment { get; set; }
 
         /// <summary>
         /// The <see cref="IConfiguration" /> containing the merged configuration of the application and the <see cref="IHost" />.

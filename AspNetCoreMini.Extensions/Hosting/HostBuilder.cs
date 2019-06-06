@@ -1,8 +1,11 @@
 ﻿using AspNetCoreMini.Extensions.Hosting.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 
 namespace AspNetCoreMini.Extensions.Hosting
 {
@@ -14,6 +17,7 @@ namespace AspNetCoreMini.Extensions.Hosting
         private bool _hostBuilt;
         private IConfiguration _hostConfiguration;
         private HostBuilderContext _hostBuilderContext;
+        private HostingEnvironment _hostingEnvironment;
         private IServiceProvider _appServices;
 
         /// <summary>
@@ -53,7 +57,7 @@ namespace AspNetCoreMini.Extensions.Hosting
             _hostBuilt = true;
 
             BuildHostConfiguration();
-            //CreateHostingEnvironment();
+            CreateHostingEnvironment();
             CreateHostBuilderContext();
             //BuildAppConfiguration();
             CreateServiceProvider();
@@ -73,12 +77,42 @@ namespace AspNetCoreMini.Extensions.Hosting
             _hostConfiguration = configBuilder.Build();
         }
 
+        private void CreateHostingEnvironment()
+        {
+            _hostingEnvironment = new HostingEnvironment()
+            {
+                ApplicationName = _hostConfiguration[HostDefaults.ApplicationKey],
+                EnvironmentName = _hostConfiguration[HostDefaults.EnvironmentKey] ?? Environments.Production,
+                ContentRootPath = ResolveContentRootPath(_hostConfiguration[HostDefaults.ContentRootKey], AppContext.BaseDirectory),
+            };
+
+            if (string.IsNullOrEmpty(_hostingEnvironment.ApplicationName))
+            {
+                // Note GetEntryAssembly returns null for the net4x console test runner.
+                _hostingEnvironment.ApplicationName = Assembly.GetEntryAssembly()?.GetName().Name;
+            }
+
+            _hostingEnvironment.ContentRootFileProvider = new PhysicalFileProvider(_hostingEnvironment.ContentRootPath);
+        }
+
+        private string ResolveContentRootPath(string contentRootPath, string basePath)
+        {
+            if (string.IsNullOrEmpty(contentRootPath))
+            {
+                return basePath;
+            }
+            if (Path.IsPathRooted(contentRootPath))
+            {
+                return contentRootPath;
+            }
+            return Path.Combine(Path.GetFullPath(basePath), contentRootPath);
+        }
 
         private void CreateHostBuilderContext()
         {
             _hostBuilderContext = new HostBuilderContext(Properties)
             {
-                //HostingEnvironment = _hostingEnvironment,
+                HostingEnvironment = _hostingEnvironment,
                 Configuration = _hostConfiguration
             };
         }
@@ -86,8 +120,10 @@ namespace AspNetCoreMini.Extensions.Hosting
         private void CreateServiceProvider()
         {
             var services = new ServiceCollection();
+            services.AddSingleton<IHostEnvironment>(_hostingEnvironment);
             services.AddSingleton(_hostBuilderContext);
             services.AddSingleton<IHostApplicationLifetime, ApplicationLifetime>();
+            services.AddSingleton<IHostLifetime, ConsoleLifetime>();
             services.AddSingleton<IHost, Internal.Host>();
             services.AddOptions();
             services.AddLogging();

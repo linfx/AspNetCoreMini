@@ -12,7 +12,7 @@ namespace AspNetCoreMini.Extensions.Hosting.Internal
     internal class Host : IHost
     {
         private readonly ILogger<Host> _logger;
-        //private readonly IHostLifetime _hostLifetime;
+        private readonly IHostLifetime _hostLifetime;
         private readonly ApplicationLifetime _applicationLifetime;
         private readonly HostOptions _options;
         private IEnumerable<IHostedService> _hostedServices;
@@ -21,13 +21,13 @@ namespace AspNetCoreMini.Extensions.Hosting.Internal
             IServiceProvider services,
             IHostApplicationLifetime applicationLifetime,
             ILogger<Host> logger,
-            //IHostLifetime hostLifetime,
+            IHostLifetime hostLifetime,
             IOptions<HostOptions> options)
         {
             Services = services ?? throw new ArgumentNullException(nameof(services));
             _applicationLifetime = (applicationLifetime ?? throw new ArgumentNullException(nameof(applicationLifetime))) as ApplicationLifetime;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            //_hostLifetime = hostLifetime ?? throw new ArgumentNullException(nameof(hostLifetime));
+            _hostLifetime = hostLifetime ?? throw new ArgumentNullException(nameof(hostLifetime));
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
@@ -38,7 +38,7 @@ namespace AspNetCoreMini.Extensions.Hosting.Internal
             using var combinedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _applicationLifetime.ApplicationStopping);
             var combinedCancellationToken = combinedCancellationTokenSource.Token;
 
-            //await _hostLifetime.WaitForStartAsync(combinedCancellationToken);
+            await _hostLifetime.WaitForStartAsync(combinedCancellationToken);
 
             combinedCancellationToken.ThrowIfCancellationRequested();
             _hostedServices = Services.GetService<IEnumerable<IHostedService>>();
@@ -80,7 +80,7 @@ namespace AspNetCoreMini.Extensions.Hosting.Internal
                 }
 
                 token.ThrowIfCancellationRequested();
-                //await _hostLifetime.StopAsync(token);
+                await _hostLifetime.StopAsync(token);
 
                 // Fire IHostApplicationLifetime.Stopped
                 _applicationLifetime?.NotifyStopped();
