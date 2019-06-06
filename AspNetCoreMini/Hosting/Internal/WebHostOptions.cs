@@ -12,5 +12,7 @@ namespace AspNetCoreMini.Hosting
             this.configuration = configuration;
             this.name = name;
         }
+
+        public bool CaptureStartupErrors { get; internal set; }
     }
 }

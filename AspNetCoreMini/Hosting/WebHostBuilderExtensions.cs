@@ -43,17 +43,17 @@ namespace AspNetCoreMini.Hosting
             //hostBuilder.UseSetting(WebHostDefaults.ApplicationKey, startupAssemblyName);
 
             // Light up the ISupportsStartup implementation
-            //if (hostBuilder is ISupportsStartup supportsStartup)
-            //{
-            //    return supportsStartup.Configure(configureApp);
-            //}
+            if (hostBuilder is ISupportsStartup supportsStartup)
+            {
+                return supportsStartup.Configure(configureApp);
+            }
 
             return hostBuilder.ConfigureServices((context, services) =>
             {
-                //services.AddSingleton<IStartup>(sp =>
-                //{
-                //    return new DelegateStartup(sp.GetRequiredService<IServiceProviderFactory<IServiceCollection>>(), (app => configureApp(context, app)));
-                //});
+                services.AddSingleton<IStartup>(sp =>
+                {
+                    return new DelegateStartup(sp.GetRequiredService<IServiceProviderFactory<IServiceCollection>>(), (app => configureApp(context, app)));
+                });
             });
         }
     }

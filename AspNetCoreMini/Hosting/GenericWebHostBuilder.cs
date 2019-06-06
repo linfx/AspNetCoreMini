@@ -6,10 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
 using System.Reflection;
+using System.Linq;
+using System.Runtime.ExceptionServices;
 
 namespace AspNetCoreMini.Hosting
 {
-    internal class GenericWebHostBuilder : IWebHostBuilder
+    internal class GenericWebHostBuilder : IWebHostBuilder, ISupportsStartup
     {
         private IHostBuilder _builder;
         private readonly IConfiguration _config;
@@ -22,6 +24,11 @@ namespace AspNetCoreMini.Hosting
                  .AddEnvironmentVariables(prefix: "ASPNETCORE_")
                  .Build();
 
+            _builder.ConfigureHostConfiguration(config =>
+            {
+                config.AddConfiguration(_config);
+            });
+
             _builder.ConfigureServices((context, services) =>
             {
                 services.Configure<GenericWebHostServiceOptions>(options =>
@@ -32,7 +39,7 @@ namespace AspNetCoreMini.Hosting
                     //options.HostingStartupExceptions = _hostingStartupErrors;
                 });
 
-                //services.AddHostedService<GenericWebHostService>();
+                //GenericWebHostService
                 services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, GenericWebHostService>());
 
                 services.TryAddSingleton<IHttpContextFactory, DefaultHttpContextFactory>();
@@ -96,6 +103,98 @@ namespace AspNetCoreMini.Hosting
             var webHostContext = (WebHostBuilderContext)contextVal;
             webHostContext.Configuration = context.Configuration;
             return webHostContext;
+        }
+
+        public IWebHostBuilder UseStartup(Type startupType)
+        {
+            // UseStartup can be called multiple times. Only run the last one.
+            _builder.Properties["UseStartup.StartupType"] = startupType;
+            _builder.ConfigureServices((context, services) =>
+            {
+                if (_builder.Properties.TryGetValue("UseStartup.StartupType", out var cachedType) && (Type)cachedType == startupType)
+                {
+                    UseStartup(startupType, context, services);
+                }
+            });
+
+            return this;
+        }
+
+        private void UseStartup(Type startupType, HostBuilderContext context, IServiceCollection services)
+        {
+            var webHostBuilderContext = GetWebHostBuilderContext(context);
+            var webHostOptions = (WebHostOptions)context.Properties[typeof(WebHostOptions)];
+
+            ExceptionDispatchInfo startupError = null;
+            object instance = null;
+            ConfigureBuilder configureBuilder = null;
+
+            try
+            {
+                // We cannot support methods that return IServiceProvider as that is terminal and we need ConfigureServices to compose
+                if (typeof(IStartup).IsAssignableFrom(startupType))
+                {
+                    throw new NotSupportedException($"{typeof(IStartup)} isn't supported");
+                }
+                //if (StartupLoader.HasConfigureServicesIServiceProviderDelegate(startupType, context.HostingEnvironment.EnvironmentName))
+                //{
+                //    throw new NotSupportedException($"ConfigureServices returning an {typeof(IServiceProvider)} isn't supported.");
+                //}
+
+                instance = ActivatorUtilities.CreateInstance(new HostServiceProvider(webHostBuilderContext), startupType);
+                context.Properties[_startupKey] = instance;
+
+                // Startup.ConfigureServices
+                var configureServicesBuilder = StartupLoader.FindConfigureServicesDelegate(startupType, context.HostingEnvironment.EnvironmentName);
+                var configureServices = configureServicesBuilder.Build(instance);
+
+                configureServices(services);
+
+                // REVIEW: We're doing this in the callback so that we have access to the hosting environment
+                // Startup.ConfigureContainer
+                var configureContainerBuilder = StartupLoader.FindConfigureContainerDelegate(startupType, context.HostingEnvironment.EnvironmentName);
+                if (configureContainerBuilder.MethodInfo != null)
+                {
+                    var containerType = configureContainerBuilder.GetContainerType();
+                    // Store the builder in the property bag
+                    _builder.Properties[typeof(ConfigureContainerBuilder)] = configureContainerBuilder;
+
+                    var actionType = typeof(Action<,>).MakeGenericType(typeof(HostBuilderContext), containerType);
+
+                    // Get the private ConfigureContainer method on this type then close over the container type
+                    var configureCallback = GetType().GetMethod(nameof(ConfigureContainer), BindingFlags.NonPublic | BindingFlags.Instance)
+                                                     .MakeGenericMethod(containerType)
+                                                     .CreateDelegate(actionType, this);
+
+                    // _builder.ConfigureContainer<T>(ConfigureContainer);
+                    typeof(IHostBuilder).GetMethods().First(m => m.Name == nameof(IHostBuilder.ConfigureContainer))
+                        .MakeGenericMethod(containerType)
+                        .InvokeWithoutWrappingExceptions(_builder, new object[] { configureCallback });
+                }
+
+                // Resolve Configure after calling ConfigureServices and ConfigureContainer
+                //configureBuilder = StartupLoader.FindConfigureDelegate(startupType, context.HostingEnvironment.EnvironmentName);
+            }
+            catch (Exception ex) when (webHostOptions.CaptureStartupErrors)
+            {
+                startupError = ExceptionDispatchInfo.Capture(ex);
+            }
+
+            // Startup.Configure
+            services.Configure<GenericWebHostServiceOptions>(options =>
+            {
+                options.ConfigureApplication = app =>
+                {
+                    // Throw if there was any errors initializing startup
+                    startupError?.Throw();
+
+                    // Execute Startup.Configure
+                    if (instance != null && configureBuilder != null)
+                    {
+                        configureBuilder.Build(instance)(app);
+                    }
+                };
+            });
         }
     }
 }
