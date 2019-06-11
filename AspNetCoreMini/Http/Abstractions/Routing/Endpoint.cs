@@ -1,4 +1,4 @@
-﻿namespace AspNetCoreMini.Http.Abstractions.Routing
+﻿namespace AspNetCoreMini.Http
 {
     /// <summary>
     /// Represents a logical endpoint in an application.

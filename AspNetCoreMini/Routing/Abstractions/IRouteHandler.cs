@@ -1,6 +1,6 @@
 ﻿using AspNetCoreMini.Http;
 
-namespace AspNetCoreMini.Routing.Abstractions
+namespace AspNetCoreMini.Routing
 {
     /// <summary>
     /// Defines a contract for a handler of a route. 

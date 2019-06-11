@@ -11,7 +11,7 @@ namespace AspNetCoreMini.Extensions.Hosting.Internal
 {
     internal class Host : IHost
     {
-        private readonly ILogger<Host> _logger;
+        private readonly ILogger _logger;
         private readonly IHostLifetime _hostLifetime;
         private readonly ApplicationLifetime _applicationLifetime;
         private readonly HostOptions _options;

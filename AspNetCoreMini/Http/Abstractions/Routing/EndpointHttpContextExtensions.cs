@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AspNetCoreMini.Http.Abstractions.Routing
+namespace AspNetCoreMini.Http
 {
     /// <summary>
     /// Extension methods to expose Endpoint on HttpContext.

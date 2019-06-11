@@ -1,5 +1,4 @@
-﻿using AspNetCoreMini.Http.Features;
-using System;
+﻿using System;
 
 namespace AspNetCoreMini.Http
 {

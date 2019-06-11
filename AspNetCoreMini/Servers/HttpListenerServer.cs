@@ -1,7 +1,4 @@
-﻿using AspNetCoreMini.Hosting;
-using AspNetCoreMini.Hosting.Server.Abstractions;
-using AspNetCoreMini.Http;
-using AspNetCoreMini.Http.Abstractions.Routing;
+﻿using AspNetCoreMini.Hosting.Server.Abstractions;
 using AspNetCoreMini.Http.Features;
 using System;
 using System.Net;

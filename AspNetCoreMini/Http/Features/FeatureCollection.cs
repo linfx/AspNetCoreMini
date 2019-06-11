@@ -37,8 +37,7 @@ namespace AspNetCoreMini.Http.Features
                     throw new ArgumentNullException(nameof(key));
                 }
 
-                object result;
-                return _features != null && _features.TryGetValue(key, out result) ? result : _defaults?[key];
+                return _features != null && _features.TryGetValue(key, out object result) ? result : _defaults?[key];
             }
             set
             {

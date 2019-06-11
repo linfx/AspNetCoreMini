@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace AspNetCoreMini.Routing.Abstractions
+namespace AspNetCoreMini.Routing
 {
     public interface IRouter
     {

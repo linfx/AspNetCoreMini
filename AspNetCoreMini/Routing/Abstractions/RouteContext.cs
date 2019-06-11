@@ -1,7 +1,7 @@
 ﻿using AspNetCoreMini.Http;
 using System;
 
-namespace AspNetCoreMini.Routing.Abstractions
+namespace AspNetCoreMini.Routing
 {
     /// <summary>
     /// A context object for <see cref="IRouter.RouteAsync(RouteContext)"/>.

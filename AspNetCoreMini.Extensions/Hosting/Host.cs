@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.EventLog;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace AspNetCoreMini.Extensions.Hosting
@@ -13,6 +14,7 @@ namespace AspNetCoreMini.Extensions.Hosting
         {
             var builder = new HostBuilder();
 
+            builder.UseContentRoot(Directory.GetCurrentDirectory());
             builder.ConfigureHostConfiguration(config =>
             {
                 config.AddEnvironmentVariables(prefix: "DOTNET_");

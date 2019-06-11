@@ -1,4 +1,4 @@
-﻿namespace AspNetCoreMini.Routing.Abstractions
+﻿namespace AspNetCoreMini.Routing
 {
     public class VirtualPathContext
     {

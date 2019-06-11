@@ -34,5 +34,13 @@ namespace AspNetCoreMini.Routing.Builder
 
             return builder.UseMiddleware<RouterMiddleware>(router);
         }
+
+        public static IApplicationBuilder UseRouter(this IApplicationBuilder builder, Action<IRouteBuilder> action)
+        {
+            var routeBuilder = new RouteBuilder(builder);
+            action(routeBuilder);
+
+            return builder.UseRouter(routeBuilder.Build());
+        }
     }
 }

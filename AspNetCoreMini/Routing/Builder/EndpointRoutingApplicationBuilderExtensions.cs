@@ -5,6 +5,23 @@ namespace AspNetCoreMini.Routing.Builder
 {
     public static class EndpointRoutingApplicationBuilderExtensions
     {
+        private const string EndpointRouteBuilder = "__EndpointRouteBuilder";
+
+        public static IApplicationBuilder UseRouting(this IApplicationBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
+            //VerifyRoutingServicesAreRegistered(builder);
+
+            var endpointRouteBuilder = new DefaultEndpointRouteBuilder(builder);
+            //builder.Properties[EndpointRouteBuilder] = endpointRouteBuilder;
+
+            return builder.UseMiddleware<EndpointRoutingMiddleware>(endpointRouteBuilder);
+        }
+
         public static IApplicationBuilder UseEndpoints(this IApplicationBuilder builder, Action<IEndpointRouteBuilder> configure)
         {
             if (builder == null)

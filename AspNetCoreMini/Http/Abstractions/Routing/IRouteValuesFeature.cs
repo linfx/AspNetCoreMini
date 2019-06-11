@@ -1,4 +1,4 @@
-﻿namespace AspNetCoreMini.Http.Abstractions.Routing
+﻿namespace AspNetCoreMini.Http
 {
     /// <summary>
     /// A feature interface for routing values. Use <see cref="HttpContext.Features"/>

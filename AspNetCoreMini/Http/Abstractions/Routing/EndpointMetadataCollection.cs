@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-namespace AspNetCoreMini.Http.Abstractions.Routing
+namespace AspNetCoreMini.Http
 {
     /// <summary>
     /// A collection of arbitrary metadata associated with an endpoint.

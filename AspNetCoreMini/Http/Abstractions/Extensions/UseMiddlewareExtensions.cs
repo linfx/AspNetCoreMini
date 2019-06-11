@@ -52,10 +52,7 @@ namespace AspNetCoreMini.Http
             return app.Use(next =>
             {
                 var methods = middleware.GetMethods(BindingFlags.Instance | BindingFlags.Public);
-                var invokeMethods = methods.Where(m =>
-                    string.Equals(m.Name, InvokeMethodName, StringComparison.Ordinal)
-                    || string.Equals(m.Name, InvokeAsyncMethodName, StringComparison.Ordinal)
-                    ).ToArray();
+                var invokeMethods = methods.Where(m => string.Equals(m.Name, InvokeMethodName, StringComparison.Ordinal) || string.Equals(m.Name, InvokeAsyncMethodName, StringComparison.Ordinal)).ToArray();
 
                 if (invokeMethods.Length > 1)
                 {

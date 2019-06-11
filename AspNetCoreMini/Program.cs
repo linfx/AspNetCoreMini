@@ -3,6 +3,7 @@ using AspNetCoreMini.Hosting;
 using AspNetCoreMini.Http;
 using AspNetCoreMini.Servers;
 using System.Threading.Tasks;
+using AspNetCoreMini.Routing.Builder;
 
 namespace AspNetCoreMini
 {
@@ -14,8 +15,16 @@ namespace AspNetCoreMini
                 .ConfigureWebHost(builder =>
                 {
                     builder.UseHttpListenerServer()
+                    .ConfigureServices(services =>
+                    {
+                        //services.AddRouting();
+                    })
                     .Configure(app =>
                     {
+                        app.UseEndpoints(endpoints =>
+                        {
+                        });
+
                         app.Run(async (context) =>
                         {
                             await context.Response.WriteAsync("Hello World!");

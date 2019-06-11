@@ -1,5 +1,4 @@
-﻿using AspNetCoreMini.Http.Abstractions;
-using AspNetCoreMini.Http.Features;
+﻿using AspNetCoreMini.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
